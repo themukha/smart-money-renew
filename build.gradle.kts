@@ -36,7 +36,7 @@ tasks {
     register("stage") {
         group = "Application"
         description = "Runs the application"
-        dependsOn("clean", "build", "run")
+        dependsOn("shadowJar")
     }
 }
 
