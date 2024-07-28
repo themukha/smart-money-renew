@@ -29,7 +29,8 @@ object DatabaseFactory {
                 WalletUsers,
                 Accounts,
                 Transactions,
-                Categories
+                Categories,
+                inBatch = true
             )
         }
     }

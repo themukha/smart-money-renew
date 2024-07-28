@@ -19,6 +19,12 @@ application {
     mainClass.set("com.themukha.smartmoney.ApplicationKt")
 }
 
+tasks {
+    register("stage") {
+        dependsOn("shadowJar")
+    }
+}
+
 repositories {
     mavenCentral()
 }
