@@ -13,7 +13,8 @@ class SecurityConfig(private val config: ApplicationConfig) {
 
     fun configureSecurity(application: Application) {
         val jwtConfig = config.config("jwt")
-        println(jwtConfig.keys())
+        val toPrint = config.config("database")
+        println(toPrint.keys())
         val jwtAudience = jwtConfig.property("audience").getString()
         val jwtDomain = jwtConfig.property("domain").getString()
         val jwtRealm = jwtConfig.property("realm").getString()
