@@ -15,13 +15,25 @@ plugins {
 group = "com.themukha"
 version = "0.0.1"
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
+}
+
 application {
     mainClass.set("com.themukha.smartmoney.ApplicationKt")
 }
 
 tasks {
     register("stage") {
-        dependsOn("build")
+        dependsOn("clean", "build", "run")
     }
 }
 
