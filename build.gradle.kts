@@ -16,7 +16,7 @@ group = "com.themukha"
 version = "0.0.1"
 
 application {
-    mainClass.set("com.themukha.ApplicationKt")
+    mainClass.set("com.themukha.smartmoney.ApplicationKt")
 }
 
 repositories {
