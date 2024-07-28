@@ -6,10 +6,11 @@ val exposedVersion: String = "0.52.0"
 
 plugins {
     kotlin("jvm") version "2.0.0"
-    application
     id("io.ktor.plugin") version "2.3.12"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.0.0"
     id("com.github.johnrengelman.shadow") version "8.1.1" // Для создания fat JAR
+    id("application")
+    application
 }
 
 group = "com.themukha"
@@ -33,6 +34,8 @@ application {
 
 tasks {
     register("stage") {
+        group = "Application"
+        description = "Runs the application"
         dependsOn("clean", "build", "run")
     }
 }
