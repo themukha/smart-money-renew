@@ -10,12 +10,10 @@ import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.config.ApplicationConfig
 
 class SecurityConfig(private val config: ApplicationConfig) {
-    companion object {
-        const val JWT_CONFIG_NAME = "jwt"
-    }
 
     fun configureSecurity(application: Application) {
-        val jwtConfig = config.config(JWT_CONFIG_NAME)
+        val jwtConfig = config.config("jwt")
+        println(jwtConfig.keys())
         val jwtAudience = jwtConfig.property("audience").getString()
         val jwtDomain = jwtConfig.property("domain").getString()
         val jwtRealm = jwtConfig.property("realm").getString()
