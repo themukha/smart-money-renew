@@ -21,7 +21,7 @@ application {
 
 tasks {
     register("stage") {
-        dependsOn("shadowJar")
+        dependsOn("run")
     }
 }
 
