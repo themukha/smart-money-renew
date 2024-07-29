@@ -2,6 +2,7 @@ package com.themukha.smartmoney.plugins
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import de.sharpmind.ktor.EnvConfig
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
@@ -15,6 +16,8 @@ class SecurityConfig(private val config: ApplicationConfig) {
         val jwtConfig = config.config("jwt")
         val toPrint = config.config("database")
         println(System.getenv("JWT_SECRET"))
+        val envConfigJwtSecret = EnvConfig.getStringOrNull("JWT_SECRET")
+        println("EnvConfig JWT_SECRET: $envConfigJwtSecret")
         val jwtAudience = jwtConfig.property("audience").getString()
         val jwtDomain = jwtConfig.property("domain").getString()
         val jwtRealm = jwtConfig.property("realm").getString()

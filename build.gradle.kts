@@ -3,6 +3,7 @@ val logbackVersion: String = "1.5.6"
 val postgresVersion: String = "42.7.3"
 val h2Version: String = "2.3.230"
 val exposedVersion: String = "0.52.0"
+val ktorEnvConfigVersion: String = "2.1.1"
 
 plugins {
     kotlin("jvm") version "2.0.0"
@@ -64,6 +65,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
 
     // Other libraries
+    implementation("de.sharpmind.ktor:ktor-env-config:$ktorEnvConfigVersion") // Get environment variables for Ktor in Koyeb
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
     testImplementation("io.ktor:ktor-server-tests")
