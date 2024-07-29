@@ -31,5 +31,3 @@ COPY --from=build /app/build/libs/smart-money-renew-all.jar /app/smart-money-ren
 EXPOSE 8080
 
 CMD ["java", "-jar", "smart-money-renew-all.jar"]
-#CMD ["sh", "-c", "source /app/.env && java -jar smart-money-renew-all.jar"]
-#CMD ["sh", "-c", "ls -la && cat .env && source /app/.env && java -Dspring.profiles.active=prod -jar smart-money-renew-all.jar"]

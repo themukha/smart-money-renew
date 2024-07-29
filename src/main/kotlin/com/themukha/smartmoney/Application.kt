@@ -12,9 +12,7 @@ fun Application.module() {
     val monitoringConfig = MonitoringConfig()
     val serializationConfig = SerializationConfig()
     val routingConfig = RoutingConfig()
-    val envConfig = de.sharpmind.ktor.EnvConfig
 
-    envConfig.initConfig(environment.config)
     securityConfig.configureSecurity(this)
     monitoringConfig.configureMonitoring(this)
     serializationConfig.configureSerialization(this)
