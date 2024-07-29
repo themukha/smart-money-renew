@@ -14,11 +14,11 @@ fun Application.module() {
     val routingConfig = RoutingConfig()
     val envConfig = de.sharpmind.ktor.EnvConfig
 
+    envConfig.initConfig(environment.config)
     securityConfig.configureSecurity(this)
     monitoringConfig.configureMonitoring(this)
     serializationConfig.configureSerialization(this)
     routingConfig.configureRouting(this)
-    envConfig.initConfig(environment.config)
 
     DatabaseFactory.init(environment.config)
 }
