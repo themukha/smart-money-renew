@@ -22,6 +22,7 @@ class SecurityConfig(private val config: ApplicationConfig) {
         val jwtDomain = jwtConfig.property("domain").getString()
         val jwtRealm = jwtConfig.property("realm").getString()
         val jwtSecret = jwtConfig.property("secret").getString()
+        println("Secret jwtConfig: $jwtSecret")
 
         application.install(Authentication) {
             jwt("auth-jwt") {
