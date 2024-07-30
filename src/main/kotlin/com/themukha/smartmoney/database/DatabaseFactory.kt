@@ -9,7 +9,11 @@ import com.themukha.smartmoney.models.Wallets
 import io.ktor.server.config.ApplicationConfig
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.Slf4jSqlDebugLogger
+import org.jetbrains.exposed.sql.addLogger
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.sql.Connection
 
 object DatabaseFactory {
 
@@ -21,6 +25,11 @@ object DatabaseFactory {
         val password = databaseConfig.property("password").getString()
 
         Database.connect(jdbcUrl, driverClassName, username, password)
+
+        TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
+        transaction {
+            addLogger(Slf4jSqlDebugLogger)
+        }
 
         transaction {
             SchemaUtils.createMissingTablesAndColumns(
