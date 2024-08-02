@@ -3,12 +3,12 @@ package com.themukha.smartmoney.auth
 import com.themukha.smartmoney.dto.UserDto
 import com.themukha.smartmoney.models.User
 import com.themukha.smartmoney.repositories.UserRepository
+import io.github.smiley4.ktorswaggerui.dsl.routing.post
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.exceptions.ExposedSQLException
@@ -26,7 +26,25 @@ object Authentication {
         hashFunction: (String) -> String,
     ) {
         route("/auth") {
-            post("/register") {
+            post("/register", {
+                description = "Register a new user"
+                request {
+                    body<RegisterRequest> {
+                        description = "Data to register a new user"
+                    }
+                }
+                response {
+                    HttpStatusCode.Created to {
+                        description = "User successfully created"
+                        body<UserDto> {
+                            description = "User data"
+                        }
+                    }
+                    HttpStatusCode.Conflict to {
+                        description = "User with this email already exists"
+                    }
+                }
+            }) {
                 val registerRequest: RegisterRequest = call.receive<RegisterRequest>()
 
                 try {
@@ -62,7 +80,25 @@ object Authentication {
                 }
             }
 
-            post("/login") {
+            post("/login", {
+                description = "Login to the application (get JWT token)"
+                request {
+                    body<LoginRequest> {
+                        description = "Data to login"
+                    }
+                }
+                response {
+                    HttpStatusCode.OK to {
+                        description = "User successfully logged in"
+                        body<TokenResponse> {
+                            description = "Token data"
+                        }
+                    }
+                    HttpStatusCode.Unauthorized to {
+                        description = "Invalid credentials"
+                    }
+                }
+            }) {
                 val loginRequest: LoginRequest = call.receive<LoginRequest>()
                 val user: User? = db.findUserByEmail(loginRequest.email)
 

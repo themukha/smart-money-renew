@@ -5,6 +5,7 @@ import com.themukha.smartmoney.database.DatabaseFactory
 import com.themukha.smartmoney.plugins.*
 import com.themukha.smartmoney.repositories.UserRepository
 import com.themukha.smartmoney.repositories.UserRepositoryImpl
+import io.github.smiley4.ktorswaggerui.SwaggerUI
 import io.ktor.server.application.*
 import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.netty.*
@@ -32,6 +33,7 @@ fun Application.module() {
     configureMonitoring()
     configureSerialization()
     configureRouting()
+    configureSwagger()
 }
 
 private fun Application.configureSecurity() {
@@ -52,6 +54,20 @@ private fun Application.configureSerialization() {
 private fun Application.configureRouting() {
     val routingConfig by inject<RoutingConfig>()
     routingConfig.configureRouting(this)
+}
+
+private fun Application.configureSwagger() {
+    install(SwaggerUI) {
+        info {
+            title = "Smart Money API"
+            version = "0.0.1"
+            description = "Smart Money API for testing and demonstration purposes."
+        }
+        server {
+            url = "http://localhost:8080"
+            description = "Local development server"
+        }
+    }
 }
 
 private fun applicationConfig(app: Application): ApplicationConfig {

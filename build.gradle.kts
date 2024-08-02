@@ -5,6 +5,7 @@ val h2Version: String = "2.3.230"
 val exposedVersion: String = "0.52.0"
 val koinKtorVersion: String = "3.5.6"
 val mindrotBCryptVersion: String = "0.4"
+val ktorSwaggerUiVersion: String = "3.2.0"
 
 plugins {
     kotlin("jvm") version "2.0.0"
@@ -56,6 +57,7 @@ dependencies {
     implementation("io.ktor:ktor-server-auth-jwt")
     implementation("io.ktor:ktor-server-call-logging")
     implementation("io.ktor:ktor-server-content-negotiation")
+    implementation("io.github.smiley4:ktor-swagger-ui:$ktorSwaggerUiVersion")
     implementation("io.insert-koin:koin-ktor:$koinKtorVersion")
     implementation("io.insert-koin:koin-core:$koinKtorVersion")
     implementation("io.insert-koin:koin-logger-slf4j:$koinKtorVersion")
