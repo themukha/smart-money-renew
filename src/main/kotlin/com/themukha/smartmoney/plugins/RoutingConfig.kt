@@ -10,8 +10,11 @@ import io.ktor.server.routing.routing
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import com.themukha.smartmoney.auth.Authentication.authenticationRoutes
+import com.themukha.smartmoney.routes.walletRoutes
 import io.github.smiley4.ktorswaggerui.routing.openApiSpec
 import io.github.smiley4.ktorswaggerui.routing.swaggerUI
+import io.ktor.server.application.install
+import io.ktor.server.routing.IgnoreTrailingSlash
 import io.ktor.server.routing.route
 import org.mindrot.jbcrypt.BCrypt
 
@@ -36,12 +39,14 @@ class RoutingConfig : KoinComponent {
             }
 
             authenticationRoutes(userRepository, jwtService, hashFunction)
+            walletRoutes()
 
 //            userRoutes()
-//            walletRoutes()
 //            accountRoutes()
 //            transactionRoutes()
 //            categoryRoutes()
         }
+
+        application.install(IgnoreTrailingSlash)
     }
 }

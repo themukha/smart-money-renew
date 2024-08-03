@@ -5,6 +5,12 @@ import com.themukha.smartmoney.database.DatabaseFactory
 import com.themukha.smartmoney.plugins.*
 import com.themukha.smartmoney.repositories.UserRepository
 import com.themukha.smartmoney.repositories.UserRepositoryImpl
+import com.themukha.smartmoney.repositories.WalletRepository
+import com.themukha.smartmoney.repositories.WalletRepositoryImpl
+import com.themukha.smartmoney.services.UserService
+import com.themukha.smartmoney.services.UserServiceImpl
+import com.themukha.smartmoney.services.WalletService
+import com.themukha.smartmoney.services.WalletServiceImpl
 import io.github.smiley4.ktorswaggerui.SwaggerUI
 import io.ktor.server.application.*
 import io.ktor.server.config.ApplicationConfig
@@ -83,4 +89,7 @@ fun appModule(app: Application) = org.koin.dsl.module {
     single { RoutingConfig() }
 
     single<UserRepository> { UserRepositoryImpl() }
+    single<UserService> { UserServiceImpl(get()) }
+    single<WalletRepository> { WalletRepositoryImpl() }
+    single<WalletService> { WalletServiceImpl(get()) }
 }
