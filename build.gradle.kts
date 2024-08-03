@@ -6,6 +6,8 @@ val exposedVersion: String = "0.52.0"
 val koinKtorVersion: String = "3.5.6"
 val mindrotBCryptVersion: String = "0.4"
 val ktorSwaggerUiVersion: String = "3.2.0"
+val kotlinxJsonVersion: String = "1.7.1"
+val kotlinxDatetimeVersion: String = "0.6.0"
 
 plugins {
     kotlin("jvm") version "2.0.0"
@@ -57,6 +59,7 @@ dependencies {
     implementation("io.ktor:ktor-server-auth-jwt")
     implementation("io.ktor:ktor-server-call-logging")
     implementation("io.ktor:ktor-server-content-negotiation")
+    implementation("io.ktor:ktor-server-status-pages")
     implementation("io.github.smiley4:ktor-swagger-ui:$ktorSwaggerUiVersion")
     implementation("io.insert-koin:koin-ktor:$koinKtorVersion")
     implementation("io.insert-koin:koin-core:$koinKtorVersion")
@@ -73,6 +76,8 @@ dependencies {
     // Other libraries
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("org.mindrot:jbcrypt:$mindrotBCryptVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxJsonVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
     testImplementation("io.ktor:ktor-server-tests")
 }

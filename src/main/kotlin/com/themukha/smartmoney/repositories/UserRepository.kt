@@ -7,10 +7,12 @@ import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.exposedLogger
 import java.sql.BatchUpdateException
 import java.sql.SQLIntegrityConstraintViolationException
+import java.util.UUID
 
 interface UserRepository {
     suspend fun createUser(user: User): User?
     suspend fun findUserByEmail(email: String): User?
+    suspend fun findUserById(userId: UUID): User?
 }
 
 class UserRepositoryImpl : UserRepository {
@@ -41,6 +43,12 @@ class UserRepositoryImpl : UserRepository {
     override suspend fun findUserByEmail(email: String): User? = transaction {
         User.find {
             Users.email eq email
+        }.firstOrNull()
+    }
+
+    override suspend fun findUserById(userId: UUID): User? = transaction {
+        User.find {
+            Users.id eq userId
         }.firstOrNull()
     }
 }
