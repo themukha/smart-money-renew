@@ -4,9 +4,13 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import com.themukha.smartmoney.models.User
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
 import io.ktor.server.config.ApplicationConfig
 import java.time.Duration
 import java.util.Date
+import java.util.UUID
 
 class JwtService(config: ApplicationConfig) {
 
@@ -50,5 +54,10 @@ class JwtService(config: ApplicationConfig) {
         .withClaim("userId", user.id.value.toString())
         .withExpiresAt(Date(System.currentTimeMillis() + refreshTokenValidityPeriod))
         .sign(algorithm)
+}
 
+fun ApplicationCall.getUserIdFromToken(): UUID? {
+    return principal<JWTPrincipal>()?.payload?.claims?.get("userId")?.asString()?.let {
+        UUID.fromString(it)
+    }
 }

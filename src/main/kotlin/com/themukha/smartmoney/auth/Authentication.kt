@@ -1,6 +1,7 @@
 package com.themukha.smartmoney.auth
 
 import com.auth0.jwt.exceptions.JWTVerificationException
+import com.themukha.smartmoney.dto.ErrorResponse
 import com.themukha.smartmoney.dto.UserDto
 import com.themukha.smartmoney.models.User
 import com.themukha.smartmoney.repositories.UserRefreshTokenRepository
@@ -9,8 +10,6 @@ import io.github.smiley4.ktorswaggerui.dsl.routing.post
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.jwt.JWTPrincipal
-import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -84,10 +83,10 @@ object Authentication {
 
                     newUser?.let {
                         call.respond(HttpStatusCode.Created, UserDto(name = it.name, email = it.email))
-                    } ?: call.respond(HttpStatusCode.Conflict, "User with this email already exists")
+                    } ?: call.respond(HttpStatusCode.Conflict, ErrorResponse("User with this email already exists"))
                 } catch (e: Exception) {
                     println(e)
-                    call.respond(HttpStatusCode.InternalServerError, "Failed to register user")
+                    call.respond(HttpStatusCode.InternalServerError, ErrorResponse("Failed to register user"))
                 }
             }
 
@@ -106,7 +105,7 @@ object Authentication {
                     val basicAuthHeader = call.request.headers["Authorization"]
 
                     if (basicAuthHeader == null || !basicAuthHeader.startsWith("Basic ")) {
-                        call.respond(HttpStatusCode.Unauthorized, "Missing or invalid Basic Auth header")
+                        call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Missing or invalid Basic Auth header"))
                         return@post
                     }
 
@@ -114,7 +113,7 @@ object Authentication {
                     val credentials = String(Base64.getDecoder().decode(base64Credentials)).split(":")
 
                     if (credentials.size != 2) {
-                        call.respond(HttpStatusCode.Unauthorized, "Invalid Basic Auth credentials format")
+                        call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Invalid Basic Auth credentials format"))
                         return@post
                     }
 
@@ -149,7 +148,7 @@ object Authentication {
 
                         call.respond(HttpStatusCode.OK)
                     } else {
-                        call.respond(HttpStatusCode.Unauthorized, "Invalid credentials")
+                        call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Invalid credentials"))
                     }
                 }
             }
@@ -168,19 +167,18 @@ object Authentication {
                 }) {
                     transaction {
                         launch {
-                            val principal = call.principal<JWTPrincipal>()
+                            val userId = call.getUserIdFromToken()
 
-                            if (principal == null) {
-                                call.respond(HttpStatusCode.Unauthorized, "Missing JWT token")
+                            if (userId == null) {
+                                call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Missing JWT token"))
                                 return@launch
                             }
 
-                            val userId = principal.payload.claims["userId"]?.asString().let { UUID.fromString(it) }
 
                             val refreshTokenFromCookie = call.request.cookies["refreshToken"]
 
                             if (refreshTokenFromCookie == null) {
-                                call.respond(HttpStatusCode.Unauthorized, "Missing refresh token")
+                                call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Missing refresh token"))
                                 return@launch
                             }
 
@@ -189,7 +187,7 @@ object Authentication {
                                 val tokenId = UUID.fromString(decodedRefreshToken.getClaim("userId").asString())
 
                                 if (tokenId != userId) {
-                                    call.respond(HttpStatusCode.Unauthorized, "Invalid refresh token")
+                                    call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Invalid refresh token"))
                                     return@launch
                                 }
 
@@ -198,7 +196,7 @@ object Authentication {
                                 if (storedRefreshToken == refreshTokenFromCookie) {
                                     val user = userRepository.findUserById(userId)
                                     if (user == null) {
-                                        call.respond(HttpStatusCode.Unauthorized, "Invalid refresh token")
+                                        call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Invalid refresh token"))
                                         return@launch
                                     }
                                     val newAccessToken = jwtService.generateToken(user)
@@ -213,7 +211,7 @@ object Authentication {
                                     call.respond(HttpStatusCode.OK, "Access token refreshed successfully")
                                 }
                             } catch (e: JWTVerificationException) {
-                                call.respond(HttpStatusCode.Unauthorized, "Invalid refresh token")
+                                call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Invalid refresh token"))
                             }
                         }
                     }
