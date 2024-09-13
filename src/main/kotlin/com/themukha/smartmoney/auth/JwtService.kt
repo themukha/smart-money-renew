@@ -14,8 +14,12 @@ class JwtService(config: ApplicationConfig) {
     private val issuer = jwtConfig.property("issuer").getString()
     val realm = jwtConfig.property("realm").getString()
     val audience = jwtConfig.property("audience").getString()
+    val refreshAudience = jwtConfig.property("refreshAudience").getString()
     private val secret = jwtConfig.property("secret").getString()
-    private val validityPeriod = Duration.ofDays(365).toMillis()
+    private val validityPeriodInDays = jwtConfig.property("tokenValidityDays").getString().toLong()
+    private val refreshTokenValidityPeriodInDays = jwtConfig.property("refreshTokenValidityDays").getString().toLong()
+    internal val validityPeriod = Duration.ofDays(validityPeriodInDays).toMillis()
+    internal val refreshTokenValidityPeriod = Duration.ofDays(refreshTokenValidityPeriodInDays).toMillis()
 
     private val algorithm = Algorithm.HMAC256(secret)
 
@@ -25,12 +29,26 @@ class JwtService(config: ApplicationConfig) {
         .withAudience(audience)
         .build()
 
+    val verifierRefresh: JWTVerifier = JWT
+        .require(algorithm)
+        .withIssuer(issuer)
+        .withAudience(refreshAudience)
+        .build()
+
     fun generateToken(user: User): String = JWT.create()
         .withSubject("Authentication")
         .withIssuer(issuer)
         .withAudience(audience)
         .withClaim("userId", user.id.value.toString())
         .withExpiresAt(Date(System.currentTimeMillis() + validityPeriod))
+        .sign(algorithm)
+
+    fun generateRefreshToken(user: User): String = JWT.create()
+        .withSubject("RefreshToken")
+        .withIssuer(issuer)
+        .withAudience(refreshAudience)
+        .withClaim("userId", user.id.value.toString())
+        .withExpiresAt(Date(System.currentTimeMillis() + refreshTokenValidityPeriod))
         .sign(algorithm)
 
 }

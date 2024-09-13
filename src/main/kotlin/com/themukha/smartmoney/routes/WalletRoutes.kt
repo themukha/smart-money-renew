@@ -34,7 +34,7 @@ fun Route.walletRoutes() {
 
     route("/wallets") {
         authenticate("auth-jwt") {
-            post("/", {
+            post({
                 description = "Create a new wallet"
                 request {
                     body<CreateWalletRequest>()
@@ -77,7 +77,7 @@ fun Route.walletRoutes() {
                 }
             }
 
-            get("/", {
+            get({
                 description = "Get all user wallets"
                 response {
                     HttpStatusCode.OK to {

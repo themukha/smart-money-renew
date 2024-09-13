@@ -10,6 +10,7 @@ import io.ktor.server.routing.routing
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import com.themukha.smartmoney.auth.Authentication.authenticationRoutes
+import com.themukha.smartmoney.repositories.UserRefreshTokenRepository
 import com.themukha.smartmoney.routes.walletRoutes
 import io.github.smiley4.ktorswaggerui.routing.openApiSpec
 import io.github.smiley4.ktorswaggerui.routing.swaggerUI
@@ -21,12 +22,13 @@ import org.mindrot.jbcrypt.BCrypt
 class RoutingConfig : KoinComponent {
 
     private val userRepository by inject<UserRepository>()
+    private val userRefreshTokenRepository by inject<UserRefreshTokenRepository>()
     private val jwtService by inject<JwtService>()
     private val hashFunction = { it: String -> BCrypt.hashpw(it, BCrypt.gensalt()) }
 
     fun configureRouting(application: Application) {
         application.routing {
-            get("/") {
+            get {
                 call.respondText("Welcome to Smart Money API!")
             }
 
@@ -38,7 +40,7 @@ class RoutingConfig : KoinComponent {
                 swaggerUI("/api.json")
             }
 
-            authenticationRoutes(userRepository, jwtService, hashFunction)
+            authenticationRoutes(userRepository, userRefreshTokenRepository, jwtService, hashFunction)
             walletRoutes()
 
 //            userRoutes()

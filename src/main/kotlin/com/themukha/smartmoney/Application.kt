@@ -3,6 +3,8 @@ package com.themukha.smartmoney
 import com.themukha.smartmoney.auth.JwtService
 import com.themukha.smartmoney.database.DatabaseFactory
 import com.themukha.smartmoney.plugins.*
+import com.themukha.smartmoney.repositories.UserRefreshTokenRepository
+import com.themukha.smartmoney.repositories.UserRefreshTokenRepositoryImpl
 import com.themukha.smartmoney.repositories.UserRepository
 import com.themukha.smartmoney.repositories.UserRepositoryImpl
 import com.themukha.smartmoney.repositories.WalletRepository
@@ -11,7 +13,6 @@ import com.themukha.smartmoney.services.UserService
 import com.themukha.smartmoney.services.UserServiceImpl
 import com.themukha.smartmoney.services.WalletService
 import com.themukha.smartmoney.services.WalletServiceImpl
-import io.github.smiley4.ktorswaggerui.SwaggerUI
 import io.ktor.server.application.*
 import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.netty.*
@@ -63,17 +64,8 @@ private fun Application.configureRouting() {
 }
 
 private fun Application.configureSwagger() {
-    install(SwaggerUI) {
-        info {
-            title = "Smart Money API"
-            version = "0.0.1"
-            description = "Smart Money API for testing and demonstration purposes."
-        }
-        server {
-            url = "http://localhost:8080"
-            description = "Local development server"
-        }
-    }
+    val swaggerConfig by inject<SwaggerConfig>()
+    swaggerConfig.configureSwagger(this)
 }
 
 private fun applicationConfig(app: Application): ApplicationConfig {
@@ -87,8 +79,10 @@ fun appModule(app: Application) = org.koin.dsl.module {
     single { SecurityConfig(get()) }
     single { MonitoringConfig() }
     single { RoutingConfig() }
+    single { SwaggerConfig() }
 
     single<UserRepository> { UserRepositoryImpl() }
+    single<UserRefreshTokenRepository> { UserRefreshTokenRepositoryImpl() }
     single<UserService> { UserServiceImpl(get()) }
     single<WalletRepository> { WalletRepositoryImpl() }
     single<WalletService> { WalletServiceImpl(get()) }
