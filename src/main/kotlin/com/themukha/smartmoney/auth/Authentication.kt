@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.exposedLogger
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.mindrot.jbcrypt.BCrypt
 import java.sql.BatchUpdateException
@@ -58,7 +59,7 @@ object Authentication {
                 val registerRequest: RegisterRequest = call.receive<RegisterRequest>()
 
                 try {
-                    val newUser: User? = transaction {
+                    val newUser: User? = newSuspendedTransaction {
                         try {
                             User.new {
                                 name = registerRequest.name
@@ -167,7 +168,7 @@ object Authentication {
                         }
                     }
                 }) {
-                    transaction {
+                    newSuspendedTransaction {
                         launch {
                             val userId = call.getUserIdFromToken()
 

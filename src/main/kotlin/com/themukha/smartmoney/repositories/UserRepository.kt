@@ -2,9 +2,9 @@ package com.themukha.smartmoney.repositories
 
 import com.themukha.smartmoney.models.User
 import com.themukha.smartmoney.models.Users
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.exposedLogger
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.sql.BatchUpdateException
 import java.sql.SQLIntegrityConstraintViolationException
 import java.util.UUID
@@ -19,7 +19,7 @@ interface UserRepository {
 }
 class UserRepositoryImpl : UserRepository {
 
-    override suspend fun createUser(user: User): User? = transaction {
+    override suspend fun createUser(user: User): User? = newSuspendedTransaction {
         try {
             User.new {
                 name = user.name
@@ -43,23 +43,23 @@ class UserRepositoryImpl : UserRepository {
         }
     }
 
-    override suspend fun findUserByEmail(email: String): User? = transaction {
+    override suspend fun findUserByEmail(email: String): User? = newSuspendedTransaction {
         User.find {
             Users.email eq email
         }.firstOrNull()
     }
 
-    override suspend fun findUserById(userId: UUID): User? = transaction {
+    override suspend fun findUserById(userId: UUID): User? = newSuspendedTransaction {
         User.find {
             Users.id eq userId
         }.firstOrNull()
     }
 
-    override suspend fun findAll(): List<User> = transaction {
+    override suspend fun findAll(): List<User> = newSuspendedTransaction {
         User.all().toList()
     }
 
-    override suspend fun update(user: User) = transaction {
+    override suspend fun update(user: User) = newSuspendedTransaction {
         User.find {
             Users.id eq user.id
         }.firstOrNull()?.apply {
@@ -70,7 +70,7 @@ class UserRepositoryImpl : UserRepository {
         }
     }
 
-    override suspend fun delete(userId: UUID): Boolean = transaction {
+    override suspend fun delete(userId: UUID): Boolean = newSuspendedTransaction {
         User.findById(userId)?.apply {
             this.isActive = false
         } != null

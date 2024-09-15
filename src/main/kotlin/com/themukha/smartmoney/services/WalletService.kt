@@ -4,6 +4,7 @@ import com.themukha.smartmoney.dto.WalletDto
 import com.themukha.smartmoney.dto.toDto
 import com.themukha.smartmoney.models.User
 import com.themukha.smartmoney.repositories.WalletRepository
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.util.UUID
 
 interface WalletService {
@@ -15,8 +16,12 @@ interface WalletService {
 
 class WalletServiceImpl(private val walletRepository: WalletRepository) : WalletService {
     override suspend fun createWallet(name: String, currencyCode: String, creator: User): WalletDto {
-        return walletRepository.createWallet(name, currencyCode, creator).toDto()
+        return newSuspendedTransaction {
+            val newWallet = walletRepository.createWallet(name, currencyCode, creator)
+            newWallet.toDto()
+        }
     }
+
 
     override suspend fun findWalletsByUserId(userId: UUID): List<WalletDto> {
         return walletRepository.getWalletsForUser(userId).filter { it.isActive }.map { it.toDto() }
