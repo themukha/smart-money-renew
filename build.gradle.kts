@@ -8,6 +8,7 @@ val mindrotBCryptVersion: String = "0.4"
 val ktorSwaggerUiVersion: String = "3.2.0"
 val kotlinxJsonVersion: String = "1.7.1"
 val kotlinxDatetimeVersion: String = "0.6.0"
+val jacksonVersion: String = "2.17.2"
 
 plugins {
     kotlin("jvm") version "2.0.0"
@@ -78,6 +79,7 @@ dependencies {
     implementation("org.mindrot:jbcrypt:$mindrotBCryptVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxJsonVersion")
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
     testImplementation("io.ktor:ktor-server-tests")
 }

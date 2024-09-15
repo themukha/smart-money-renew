@@ -33,7 +33,7 @@ object Authentication {
         userRepository: UserRepository,
         userRefreshTokenRepository: UserRefreshTokenRepository,
         jwtService: JwtService,
-        hashFunction: (String) -> String,
+        hashFunction: (String, Int) -> String,
     ) {
         route("/auth") {
             post("/register", {
@@ -63,7 +63,7 @@ object Authentication {
                             User.new {
                                 name = registerRequest.name
                                 email = registerRequest.email
-                                passwordHash = hashFunction(registerRequest.password)
+                                passwordHash = hashFunction(registerRequest.password, 12)
                             }
                         } catch (e: Exception) {
                             val originalException = (e as? ExposedSQLException)?.cause

@@ -24,7 +24,7 @@ class RoutingConfig : KoinComponent {
     private val userRepository by inject<UserRepository>()
     private val userRefreshTokenRepository by inject<UserRefreshTokenRepository>()
     private val jwtService by inject<JwtService>()
-    private val hashFunction = { it: String -> BCrypt.hashpw(it, BCrypt.gensalt()) }
+    private val hashFunction = { password: String, rounds: Int -> BCrypt.hashpw(password, BCrypt.gensalt(rounds)) }
 
     fun configureRouting(application: Application) {
         application.routing {
