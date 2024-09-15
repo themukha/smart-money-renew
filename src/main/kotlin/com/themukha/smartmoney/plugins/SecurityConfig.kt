@@ -13,6 +13,7 @@ import io.ktor.server.auth.jwt.jwt
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.mindrot.jbcrypt.BCrypt
+import java.util.Date
 
 class SecurityConfig(private val jwtService: JwtService) : KoinComponent {
 
@@ -25,8 +26,18 @@ class SecurityConfig(private val jwtService: JwtService) : KoinComponent {
                 realm = jwtService.realm
                 verifier(jwtService.verifier)
                 validate { credential ->
-                    if (credential.payload.audience.contains(jwtService.audience)) {
-                        JWTPrincipal(credential.payload)
+                    val token = credential.payload
+                    val iss = token.issuer
+                    val aud = token.audience
+                    val expiresAt = token.expiresAt?.let { Date(it.time) }
+                    val notBefore = token.notBefore?.let { Date(it.time) }
+                    if (
+                        aud.equals(jwtService.audience) &&
+                        iss.equals(jwtService.issuer) &&
+                        expiresAt != null && expiresAt.after(Date()) &&
+                        (notBefore == null || notBefore.before(Date()))
+                    ) {
+                        JWTPrincipal(token)
                     } else {
                         null
                     }

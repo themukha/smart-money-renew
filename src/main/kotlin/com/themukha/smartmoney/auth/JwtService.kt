@@ -8,6 +8,7 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.config.ApplicationConfig
+import io.ktor.server.response.header
 import java.time.Duration
 import java.util.Date
 import java.util.UUID
@@ -15,7 +16,7 @@ import java.util.UUID
 class JwtService(config: ApplicationConfig) {
 
     private val jwtConfig = config.config("jwt")
-    private val issuer = jwtConfig.property("issuer").getString()
+    internal val issuer = jwtConfig.property("issuer").getString()
     val realm = jwtConfig.property("realm").getString()
     val audience = jwtConfig.property("audience").getString()
     val refreshAudience = jwtConfig.property("refreshAudience").getString()
@@ -24,6 +25,7 @@ class JwtService(config: ApplicationConfig) {
     private val refreshTokenValidityPeriodInDays = jwtConfig.property("refreshTokenValidityDays").getString().toLong()
     internal val validityPeriod = Duration.ofDays(validityPeriodInDays).toMillis()
     internal val refreshTokenValidityPeriod = Duration.ofDays(refreshTokenValidityPeriodInDays).toMillis()
+    internal val secureCookie: Boolean = config.config("ktor").property("environment").getString() == "prod"
 
     private val algorithm = Algorithm.HMAC256(secret)
 
@@ -59,5 +61,12 @@ class JwtService(config: ApplicationConfig) {
 fun ApplicationCall.getUserIdFromToken(): UUID? {
     return principal<JWTPrincipal>()?.payload?.claims?.get("userId")?.asString()?.let {
         UUID.fromString(it)
+    }
+}
+
+fun ApplicationCall.setCSRFHeader(token: String) {
+    val csrfToken = request.cookies["csrfToken"]
+    if (csrfToken != null) {
+        response.header("X-CSRF-Token", csrfToken)
     }
 }

@@ -135,6 +135,7 @@ object Authentication {
                             value = token,
                             path = "/",
                             httpOnly = true,
+                            secure = jwtService.secureCookie,
                             maxAge = jwtService.validityPeriod / 1000 // to seconds
                         )
 
@@ -143,6 +144,7 @@ object Authentication {
                             value = refreshToken,
                             path = "/",
                             httpOnly = true,
+                            secure = jwtService.secureCookie,
                             maxAge = jwtService.refreshTokenValidityPeriod / 1000 // to seconds
                         )
 
