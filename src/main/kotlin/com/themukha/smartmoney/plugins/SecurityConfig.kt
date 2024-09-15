@@ -28,7 +28,7 @@ class SecurityConfig(private val jwtService: JwtService) : KoinComponent {
                 validate { credential ->
                     val token = credential.payload
                     val iss = token.issuer
-                    val aud = token.audience
+                    val aud = token.audience.firstOrNull()
                     val expiresAt = token.expiresAt?.let { Date(it.time) }
                     val notBefore = token.notBefore?.let { Date(it.time) }
                     if (
