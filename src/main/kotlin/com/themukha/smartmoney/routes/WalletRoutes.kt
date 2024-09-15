@@ -3,10 +3,7 @@ package com.themukha.smartmoney.routes
 import com.themukha.smartmoney.auth.getUserIdFromToken
 import com.themukha.smartmoney.dto.ErrorResponse
 import com.themukha.smartmoney.dto.WalletDto
-import com.themukha.smartmoney.dto.toDto
 import com.themukha.smartmoney.models.Wallet
-import com.themukha.smartmoney.models.WalletUsers
-import com.themukha.smartmoney.repositories.WalletRepository
 import com.themukha.smartmoney.services.UserService
 import com.themukha.smartmoney.services.WalletService
 import io.github.smiley4.ktorswaggerui.dsl.routing.post
@@ -19,17 +16,12 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.ktor.ext.inject
 import java.util.UUID
 
 fun Route.walletRoutes() {
     val walletService by inject<WalletService>()
-    val walletRepository by inject<WalletRepository>()
     val userService by inject<UserService>()
 
     route("/wallets") {
@@ -52,28 +44,27 @@ fun Route.walletRoutes() {
                     }
                 }
             }) {
-                transaction {
-                    launch {
-                        val userId = call.getUserIdFromToken()
+                val userId = call.getUserIdFromToken()
 
-                        if (userId != null) {
-                            val user = userService.findUserById(userId)
-                            if (user != null) {
-                                val createWalletRequest = call.receive<CreateWalletRequest>()
-                                val wallet = walletService.createWallet(
-                                    createWalletRequest.name,
-                                    createWalletRequest.currencyCode,
-                                    user
-                                )
-                                call.respond(HttpStatusCode.Created, wallet)
-                            } else {
-                                call.respond(HttpStatusCode.NotFound, ErrorResponse("User not found"))
-                            }
-                        } else {
-                            call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Invalid or missing token"))
-                        }
-                    }
+                if (userId == null) {
+                    call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Invalid or missing token"))
+                    return@post
                 }
+
+                val user = userService.findUserById(userId)
+
+                if (user == null) {
+                    call.respond(HttpStatusCode.NotFound, ErrorResponse("User not found"))
+                    return@post
+                }
+
+                val createWalletRequest = call.receive<CreateWalletRequest>()
+                val wallet = walletService.createWallet(
+                    createWalletRequest.name,
+                    createWalletRequest.currencyCode,
+                    user
+                )
+                call.respond(HttpStatusCode.Created, wallet)
             }
 
             get({
@@ -91,24 +82,15 @@ fun Route.walletRoutes() {
                     }
                 }
             }) {
-                transaction {
-                    launch {
-                        val userId = call.getUserIdFromToken()
+                val userId = call.getUserIdFromToken()
 
-                        if (userId != null) {
-                            val user = userService.findUserById(userId)
-
-                            if (user != null) {
-                                val wallets = walletService.findWalletsByUserId(userId)
-                                call.respond(HttpStatusCode.OK, wallets)
-                            } else {
-                                call.respond(HttpStatusCode.NotFound, ErrorResponse("User not found"))
-                            }
-                        } else {
-                            call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Invalid or missing token"))
-                        }
-                    }
+                if (userId == null) {
+                    call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Invalid or missing token"))
+                    return@get
                 }
+
+                val wallets = walletService.findWalletsByUserId(userId)
+                call.respond(HttpStatusCode.OK, wallets)
             }
 
             get("/{walletId}", {
@@ -129,38 +111,22 @@ fun Route.walletRoutes() {
                     }
                 }
             }) {
-                transaction {
-                    launch {
-                        val userId = call.getUserIdFromToken()
+                val userId = call.getUserIdFromToken()
 
-                        if (userId == null) {
-                            call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Invalid or missing token"))
-                            return@launch
-                        }
+                if (userId == null) {
+                    call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Invalid or missing token"))
+                    return@get
+                }
 
-                        val walletId = call.parameters["walletId"]?.let { UUID.fromString(it) }
+                val walletId = call.parameters["walletId"]?.let { UUID.fromString(it) }
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, ErrorResponse("Invalid wallet ID"))
 
-                        if (walletId == null) {
-                            call.respond(HttpStatusCode.BadRequest, ErrorResponse("Invalid wallet ID"))
-                            return@launch
-                        }
+                val wallet = walletService.findWalletById(walletId, userId)
 
-                        val hasAccess: Boolean = WalletUsers.select { (WalletUsers.walletId eq walletId) and (WalletUsers.userId eq userId) }.any()
-
-                        if (hasAccess) {
-                            val wallet = walletRepository.getWalletById(walletId)
-
-                            if (wallet != null) {
-                                call.respond(HttpStatusCode.OK, wallet.toDto())
-                                return@launch
-                            } else {
-                                call.respond(HttpStatusCode.NotFound, ErrorResponse("Wallet not found"))
-                                return@launch
-                            }
-                        } else {
-                            call.respond(HttpStatusCode.Forbidden, ErrorResponse("User does not have access to this wallet"))
-                        }
-                    }
+                if (wallet != null) {
+                    call.respond(HttpStatusCode.OK, wallet)
+                } else {
+                    call.respond(HttpStatusCode.NotFound, ErrorResponse("Wallet not found"))
                 }
             }
 
@@ -184,40 +150,22 @@ fun Route.walletRoutes() {
                     }
                 }
             }) {
-                transaction {
-                    launch {
-                        val userId = call.getUserIdFromToken()
+                val userId = call.getUserIdFromToken()
 
-                        if (userId == null) {
-                            call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Invalid or missing token"))
-                            return@launch
-                        }
+                if (userId == null) {
+                    call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Invalid or missing token"))
+                    return@delete
+                }
 
-                        val walletId = call.parameters["walletId"]?.let { UUID.fromString(it) }
+                val walletId = call.parameters["walletId"]?.let { UUID.fromString(it) }
+                    ?: return@delete call.respond(HttpStatusCode.BadRequest, ErrorResponse("Invalid wallet ID"))
 
-                        if (walletId == null) {
-                            call.respond(HttpStatusCode.BadRequest, ErrorResponse("Invalid wallet ID"))
-                            return@launch
-                        }
+                val success = walletService.deleteWallet(walletId, userId)
 
-                        val wallet = walletRepository.getWalletById(walletId)
-
-                        if (wallet == null) {
-                            call.respond(HttpStatusCode.NotFound, ErrorResponse("Wallet not found"))
-                            return@launch
-                        }
-
-                        if (wallet.creator.id.value == userId) {
-                            val success = walletService.deleteWallet(walletId)
-                            if (success) {
-                                call.respond(HttpStatusCode.OK)
-                            } else {
-                                call.respond(HttpStatusCode.InternalServerError, ErrorResponse("Failed to delete the wallet"))
-                            }
-                        } else {
-                            call.respond(HttpStatusCode.Forbidden, ErrorResponse("User is not the owner of the wallet"))
-                        }
-                    }
+                if (success) {
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    call.respond(HttpStatusCode.Forbidden, ErrorResponse("User does not have permission to delete this wallet"))
                 }
             }
         }

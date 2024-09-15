@@ -13,8 +13,10 @@ interface UserRepository {
     suspend fun createUser(user: User): User?
     suspend fun findUserByEmail(email: String): User?
     suspend fun findUserById(userId: UUID): User?
+    suspend fun findAll(): List<User>
+    suspend fun update(user: User): User?
+    suspend fun delete(userId: UUID): Boolean
 }
-
 class UserRepositoryImpl : UserRepository {
 
     override suspend fun createUser(user: User): User? = transaction {
@@ -23,6 +25,7 @@ class UserRepositoryImpl : UserRepository {
                 name = user.name
                 email = user.email
                 passwordHash = user.passwordHash
+                isActive = true
             }
         } catch (e: Exception) {
             val originalException = (e as? ExposedSQLException)?.cause
@@ -50,5 +53,26 @@ class UserRepositoryImpl : UserRepository {
         User.find {
             Users.id eq userId
         }.firstOrNull()
+    }
+
+    override suspend fun findAll(): List<User> = transaction {
+        User.all().toList()
+    }
+
+    override suspend fun update(user: User) = transaction {
+        User.find {
+            Users.id eq user.id
+        }.firstOrNull()?.apply {
+            name = user.name
+            email = user.email
+            passwordHash = user.passwordHash
+            isActive = user.isActive
+        }
+    }
+
+    override suspend fun delete(userId: UUID): Boolean = transaction {
+        User.findById(userId)?.apply {
+            this.isActive = false
+        } != null
     }
 }

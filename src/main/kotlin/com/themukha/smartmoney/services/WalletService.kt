@@ -9,8 +9,8 @@ import java.util.UUID
 interface WalletService {
     suspend fun createWallet(name: String, currencyCode: String, creator: User): WalletDto
     suspend fun findWalletsByUserId(userId: UUID): List<WalletDto>
-    suspend fun findWalletById(walletId: UUID): WalletDto?
-    suspend fun deleteWallet(walletId: UUID): Boolean
+    suspend fun findWalletById(walletId: UUID, userId: UUID): WalletDto?
+    suspend fun deleteWallet(walletId: UUID, userId: UUID): Boolean
 }
 
 class WalletServiceImpl(private val walletRepository: WalletRepository) : WalletService {
@@ -19,14 +19,23 @@ class WalletServiceImpl(private val walletRepository: WalletRepository) : Wallet
     }
 
     override suspend fun findWalletsByUserId(userId: UUID): List<WalletDto> {
-        return walletRepository.getWalletsForUser(userId).map { it.toDto() }
+        return walletRepository.getWalletsForUser(userId).filter { it.isActive }.map { it.toDto() }
     }
 
-    override suspend fun findWalletById(walletId: UUID): WalletDto? {
-        return walletRepository.getWalletById(walletId)?.toDto()
+    override suspend fun findWalletById(walletId: UUID, userId: UUID): WalletDto? {
+        val wallet = walletRepository.findById(walletId)?.takeIf { it.isActive } ?: return null
+        return if (wallet.users.any { it.id.value == userId }) {
+            wallet.toDto()
+        } else null
     }
 
-    override suspend fun deleteWallet(walletId: UUID): Boolean {
-        return walletRepository.deleteWallet(walletId)
+    override suspend fun deleteWallet(walletId: UUID, userId: UUID): Boolean {
+        val wallet = walletRepository.findById(walletId)?.takeIf { it.isActive } ?: return false
+
+        return if (wallet.creator.id.value == userId) {
+            walletRepository.deleteWallet(walletId)
+        } else {
+            false
+        }
     }
 }

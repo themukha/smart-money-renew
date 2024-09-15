@@ -15,6 +15,7 @@ object Wallets : UUIDTable() {
     val currencyCode = varchar("currencyCode", 3)
     val createdAt: Column<LocalDateTime> = datetime("createdAt").defaultExpression(CurrentDateTime)
     val creator = reference("creator_id", Users)
+    val isActive = bool("isActive").default(true)
 }
 
 class Wallet(walletId: EntityID<UUID>) : UUIDEntity(walletId) {
@@ -25,4 +26,5 @@ class Wallet(walletId: EntityID<UUID>) : UUIDEntity(walletId) {
     var createdAt: LocalDateTime by Wallets.createdAt
     var creator: User by User referencedOn Wallets.creator
     var users by User via WalletUsers
+    var isActive by Wallets.isActive
 }

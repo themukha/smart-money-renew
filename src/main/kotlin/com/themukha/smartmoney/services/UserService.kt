@@ -15,6 +15,6 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
     }
 
     override suspend fun findUserById(id: UUID): User? {
-        return userRepository.findUserById(id)
+        return userRepository.findUserById(id)?.takeIf { it.isActive }
     }
 }

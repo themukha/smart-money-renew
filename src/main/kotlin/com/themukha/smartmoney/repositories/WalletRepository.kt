@@ -5,8 +5,6 @@ import com.themukha.smartmoney.models.UserRole
 import com.themukha.smartmoney.models.Wallet
 import com.themukha.smartmoney.models.WalletUsers
 import com.themukha.smartmoney.models.Wallets
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -15,7 +13,9 @@ import java.util.UUID
 interface WalletRepository {
     suspend fun createWallet(name: String, currencyCode: String, creator: User): Wallet
     suspend fun getWalletsForUser(userId: UUID): List<Wallet>
-    suspend fun getWalletById(walletId: UUID): Wallet?
+    suspend fun findById(walletId: UUID): Wallet?
+    suspend fun findAll(): List<Wallet>
+    suspend fun update(entity: Wallet): Wallet?
     suspend fun deleteWallet(walletId: UUID): Boolean
 }
 
@@ -44,13 +44,24 @@ class WalletRepositoryImpl : WalletRepository {
         Wallet.find { Wallets.id inList userWalletIds }.toList()
     }
 
-    override suspend fun getWalletById(walletId: UUID): Wallet? = transaction {
+    override suspend fun findById(walletId: UUID): Wallet? = transaction {
         Wallet.findById(walletId)
     }
 
-    override suspend fun deleteWallet(walletId: UUID): Boolean = transaction {
-        WalletUsers.deleteWhere { WalletUsers.walletId eq walletId }
+    override suspend fun findAll(): List<Wallet> = transaction {
+        Wallet.all().toList()
+    }
 
-        Wallets.deleteWhere { id eq walletId } > 0
+    override suspend fun update(entity: Wallet): Wallet? = transaction {
+        Wallet.findById(entity.id.value)?.apply {
+            name = entity.name
+            currencyCode = entity.currencyCode
+        }
+    }
+
+    override suspend fun deleteWallet(walletId: UUID): Boolean = transaction {
+        Wallet.findById(walletId)?.apply {
+            this.isActive = false
+        } != null
     }
 }
