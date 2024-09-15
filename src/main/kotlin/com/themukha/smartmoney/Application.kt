@@ -65,7 +65,7 @@ private fun Application.configureRouting() {
 
 private fun Application.configureSwagger() {
     val swaggerConfig by inject<SwaggerConfig>()
-    swaggerConfig.configureSwagger(this)
+    swaggerConfig.configureSwagger(this, applicationConfig(this))
 }
 
 private fun applicationConfig(app: Application): ApplicationConfig {
