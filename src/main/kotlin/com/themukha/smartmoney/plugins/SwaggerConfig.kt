@@ -23,7 +23,6 @@ class SwaggerConfig {
                     email = "george@themukha.tech"
                 }
             }
-            println("KTOR_ENV: ${config.config("ktor").property("environment").getString()}")
             if (config.config("ktor").property("environment").getString() == "prod") {
                 server {
                     url = "https://api.smart-money.themukha.tech"

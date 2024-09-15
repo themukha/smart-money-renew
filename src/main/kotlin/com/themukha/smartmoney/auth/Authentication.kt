@@ -10,6 +10,7 @@ import io.github.smiley4.ktorswaggerui.dsl.routing.post
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.auth.authenticate
+import io.ktor.server.engine.logError
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -87,6 +88,7 @@ object Authentication {
                     } ?: call.respond(HttpStatusCode.Conflict, ErrorResponse("User with this email already exists"))
                 } catch (e: Exception) {
                     println(e)
+                    logError(call, e)
                     call.respond(HttpStatusCode.InternalServerError, ErrorResponse("Failed to register user"))
                 }
             }
