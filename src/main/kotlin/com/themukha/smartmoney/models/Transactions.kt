@@ -9,7 +9,7 @@ import java.util.UUID
 
 object Transactions : UUIDTable() {
     val accountId = reference("account_id", Accounts).index()
-    val type = enumeration("type", TransactionType::class)
+    val type = enumerationByName("type", 8, TransactionType::class)
     val amount = decimal("amount", 10, 3)
     val category = reference("category_id", Categories).nullable()
     val dateTime = datetime("date_time")

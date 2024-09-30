@@ -9,7 +9,7 @@ import java.util.UUID
 object Categories : UUIDTable() {
     val name = varchar("name", 50)
     val walletId = reference("wallet_id", Wallets).nullable()
-    val type = enumeration("type", CategoryType::class)
+    val type = enumerationByName("type", 8, CategoryType::class)
     val isDefault = bool("is_default").default(false)
 }
 
