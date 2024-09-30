@@ -3,12 +3,16 @@ package com.themukha.smartmoney
 import com.themukha.smartmoney.auth.JwtService
 import com.themukha.smartmoney.database.DatabaseFactory
 import com.themukha.smartmoney.plugins.*
+import com.themukha.smartmoney.repositories.CategoryRepository
+import com.themukha.smartmoney.repositories.CategoryRepositoryImpl
 import com.themukha.smartmoney.repositories.UserRefreshTokenRepository
 import com.themukha.smartmoney.repositories.UserRefreshTokenRepositoryImpl
 import com.themukha.smartmoney.repositories.UserRepository
 import com.themukha.smartmoney.repositories.UserRepositoryImpl
 import com.themukha.smartmoney.repositories.WalletRepository
 import com.themukha.smartmoney.repositories.WalletRepositoryImpl
+import com.themukha.smartmoney.services.CategoryService
+import com.themukha.smartmoney.services.CategoryServiceImpl
 import com.themukha.smartmoney.services.UserService
 import com.themukha.smartmoney.services.UserServiceImpl
 import com.themukha.smartmoney.services.WalletService
@@ -41,6 +45,7 @@ fun Application.module() {
     configureSerialization()
     configureRouting()
     configureSwagger()
+    configureStatusPages()
 }
 
 private fun Application.configureSecurity() {
@@ -68,6 +73,11 @@ private fun Application.configureSwagger() {
     swaggerConfig.configureSwagger(this, applicationConfig(this))
 }
 
+private fun Application.configureStatusPages() {
+    val statusPagesConfig by inject<StatusPagesConfig>()
+    statusPagesConfig.configureStatusPages(this)
+}
+
 private fun applicationConfig(app: Application): ApplicationConfig {
     return app.environment.config
 }
@@ -80,10 +90,13 @@ fun appModule(app: Application) = org.koin.dsl.module {
     single { MonitoringConfig() }
     single { RoutingConfig() }
     single { SwaggerConfig() }
+    single { StatusPagesConfig() }
 
     single<UserRepository> { UserRepositoryImpl() }
     single<UserRefreshTokenRepository> { UserRefreshTokenRepositoryImpl() }
     single<UserService> { UserServiceImpl(get()) }
     single<WalletRepository> { WalletRepositoryImpl() }
     single<WalletService> { WalletServiceImpl(get()) }
+    single<CategoryRepository> { CategoryRepositoryImpl() }
+    single<CategoryService> { CategoryServiceImpl(get(), get()) }
 }
